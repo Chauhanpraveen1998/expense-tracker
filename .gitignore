@@ -1,0 +1,67 @@
+# ========================
+# Backend (Spring Boot)
+# ========================
+backend/target/
+backend/*.jar
+backend/*.war
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# ========================
+# Android
+# ========================
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/*.iml
+android/.idea/
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+
+# ========================
+# IDE
+# ========================
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ========================
+# Environment
+# ========================
+.env
+.env.local
+*.env
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
+
+# ========================
+# Build outputs
+# ========================
+dist/
+out/
+build/
+
+# ========================
+# Dependencies
+# ========================
+node_modules/
+
+# ========================
+# Secrets (NEVER commit)
+# ========================
+**/application-prod.yml
+**/application-secrets.yml
+*.pem
+*.key
