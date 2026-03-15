@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: expense_user
       POSTGRES_PASSWORD: expense_pass_dev
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -22,7 +22,7 @@ services:
     image: dpage/pgadmin4:latest
     container_name: expense-tracker-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@expense.local
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
@@ -46,11 +46,11 @@ volumes:
 # Connection details:
 # -------------------
 # Host:     localhost
-# Port:     5432
+# Port:     5433  (5432 is reserved for local PostgreSQL)
 # Database: expense_tracker
 # Username: expense_user
 # Password: expense_pass_dev
 #
 # pgAdmin:  http://localhost:5050
-# Email:    admin@expense.local
+# Email:    admin@expense.com
 # Password: admin
