@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -21,7 +22,9 @@ data class UserData(
     val userId: String? = null,
     val userName: String = "User",
     val email: String? = null,
-    val monthlyBudget: Double = 50000.0
+    val monthlyBudget: Double = 50000.0,
+    val notificationsEnabled: Boolean = true,
+    val darkMode: String = "system"
 )
 
 @Singleton
@@ -34,8 +37,11 @@ class UserPreferencesManager @Inject constructor(
         val USER_NAME = stringPreferencesKey("user_name")
         val EMAIL = stringPreferencesKey("email")
         val PASSWORD_HASH = stringPreferencesKey("password_hash")
-        val MONTHLY_BUDGET = stringPreferencesKey("monthly_budget")
+        val MONTHLY_BUDGET = doublePreferencesKey("monthly_budget")
         val IS_ONBOARDED = booleanPreferencesKey("is_onboarded")
+        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
+        val DARK_MODE = stringPreferencesKey("dark_mode")
+        val LAST_SYNC_TIME = stringPreferencesKey("last_sync_time")
     }
 
     val userData: Flow<UserData> = context.userDataStore.data.map { preferences ->
@@ -44,7 +50,9 @@ class UserPreferencesManager @Inject constructor(
             userId = preferences[PreferencesKeys.USER_ID],
             userName = preferences[PreferencesKeys.USER_NAME] ?: "User",
             email = preferences[PreferencesKeys.EMAIL],
-            monthlyBudget = preferences[PreferencesKeys.MONTHLY_BUDGET]?.toDoubleOrNull() ?: 50000.0
+            monthlyBudget = preferences[PreferencesKeys.MONTHLY_BUDGET] ?: 50000.0,
+            notificationsEnabled = preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] ?: true,
+            darkMode = preferences[PreferencesKeys.DARK_MODE] ?: "system"
         )
     }
 
@@ -114,7 +122,25 @@ class UserPreferencesManager @Inject constructor(
 
     suspend fun updateMonthlyBudget(budget: Double) {
         context.userDataStore.edit { preferences ->
-            preferences[PreferencesKeys.MONTHLY_BUDGET] = budget.toString()
+            preferences[PreferencesKeys.MONTHLY_BUDGET] = budget
+        }
+    }
+
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.NOTIFICATIONS_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setDarkMode(mode: String) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.DARK_MODE] = mode
+        }
+    }
+
+    suspend fun setLastSyncTime(time: String) {
+        context.userDataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_SYNC_TIME] = time
         }
     }
 

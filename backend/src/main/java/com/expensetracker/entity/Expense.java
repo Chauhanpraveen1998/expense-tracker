@@ -15,7 +15,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "expenses", indexes = {
     @Index(name = "idx_expense_user", columnList = "user_id"),
-    @Index(name = "idx_expense_date", columnList = "date"),
+    @Index(name = "idx_expense_date", columnList = "expense_date"),
     @Index(name = "idx_expense_category", columnList = "category_id"),
     @Index(name = "idx_expense_type", columnList = "transaction_type"),
     @Index(name = "idx_expense_merchant", columnList = "merchant_name")
@@ -55,7 +55,7 @@ public class Expense {
     @Column(name = "merchant_name", nullable = false)
     private String merchantName;
 
-    @Column(nullable = false)
+    @Column(name = "expense_date", nullable = false)
     private LocalDateTime date;
 
     @Column(length = 500)

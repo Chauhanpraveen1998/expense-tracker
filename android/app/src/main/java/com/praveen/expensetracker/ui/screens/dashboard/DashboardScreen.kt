@@ -28,8 +28,11 @@ import com.praveen.expensetracker.ui.theme.Spacing
 
 @Composable
 fun DashboardScreen(
-    onNavigateToSettings: () -> Unit,
-    onNavigateToTransactionDetail: (String) -> Unit,
+    onNavigateToAddExpense: () -> Unit = {},
+    onNavigateToHistory: () -> Unit = {},
+    onLogout: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToTransactionDetail: (String) -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -61,7 +64,8 @@ fun DashboardScreen(
                     onSettingsClick = onNavigateToSettings,
                     onTransactionClick = { transaction ->
                         onNavigateToTransactionDetail(transaction.id)
-                    }
+                    },
+                    onSeeAllClick = onNavigateToHistory
                 )
             }
         }
@@ -72,7 +76,8 @@ fun DashboardScreen(
 private fun DashboardContent(
     uiState: DashboardUiState,
     onSettingsClick: () -> Unit,
-    onTransactionClick: (com.praveen.expensetracker.domain.model.Transaction) -> Unit
+    onTransactionClick: (com.praveen.expensetracker.domain.model.Transaction) -> Unit,
+    onSeeAllClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -120,7 +125,7 @@ private fun DashboardContent(
                 RecentTransactionsList(
                     groupedTransactions = uiState.groupedTransactions,
                     onTransactionClick = onTransactionClick,
-                    onSeeAllClick = { }
+                    onSeeAllClick = onSeeAllClick
                 )
             } else {
                 EmptyState(

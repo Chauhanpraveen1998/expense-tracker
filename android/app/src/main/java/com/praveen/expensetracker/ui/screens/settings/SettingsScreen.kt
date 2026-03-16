@@ -12,27 +12,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,8 +52,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.praveen.expensetracker.ui.screens.auth.AuthEvent
-import com.praveen.expensetracker.ui.screens.auth.AuthViewModel
 import com.praveen.expensetracker.ui.theme.ExpenseRed
 import com.praveen.expensetracker.ui.theme.Spacing
 
@@ -53,12 +59,89 @@ import com.praveen.expensetracker.ui.theme.Spacing
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
-    onLogout: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    onNavigateToProfile: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showNotificationDialog by remember { mutableStateOf(false) }
+    var showDarkModeDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
-    
+
+    LaunchedEffect(uiState.isLoggedOut) {
+        if (uiState.isLoggedOut) {
+            onNavigateToLogin()
+        }
+    }
+
+    if (showNotificationDialog) {
+        AlertDialog(
+            onDismissRequest = { showNotificationDialog = false },
+            title = { Text("Notifications") },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Enable notifications")
+                    Switch(
+                        checked = uiState.notificationsEnabled,
+                        onCheckedChange = { 
+                            viewModel.onEvent(SettingsEvent.ToggleNotifications(it))
+                            showNotificationDialog = false
+                        }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showNotificationDialog = false }) {
+                    Text("Done")
+                }
+            }
+        )
+    }
+
+    if (showDarkModeDialog) {
+        AlertDialog(
+            onDismissRequest = { showDarkModeDialog = false },
+            title = { Text("Dark Mode") },
+            text = {
+                Column {
+                    DarkMode.entries.forEach { mode ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.onEvent(SettingsEvent.SetDarkMode(mode))
+                                    showDarkModeDialog = false
+                                }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = uiState.darkMode == mode,
+                                onClick = {
+                                    viewModel.onEvent(SettingsEvent.SetDarkMode(mode))
+                                    showDarkModeDialog = false
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = when (mode) {
+                                    DarkMode.SYSTEM -> "System default"
+                                    DarkMode.LIGHT -> "Light"
+                                    DarkMode.DARK -> "Dark"
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {}
+        )
+    }
+
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
@@ -67,9 +150,8 @@ fun SettingsScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.onEvent(AuthEvent.Logout)
+                        viewModel.onEvent(SettingsEvent.Logout)
                         showLogoutDialog = false
-                        onLogout()
                     }
                 ) {
                     Text("Logout", color = ExpenseRed)
@@ -82,7 +164,7 @@ fun SettingsScreen(
             }
         )
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -101,65 +183,87 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-                .verticalScroll(rememberScrollState())
         ) {
-            // Account Section
-            SettingsSection(title = "Account") {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if (uiState.isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                SettingsSection(title = "Account") {
+                    SettingsItem(
+                        icon = Icons.Default.Security,
+                        title = "Profile",
+                        subtitle = "Manage your account details",
+                        onClick = onNavigateToProfile
+                    )
+                    SettingsItem(
+                        icon = Icons.Default.Notifications,
+                        title = "Notifications",
+                        subtitle = if (uiState.notificationsEnabled) "Enabled" else "Disabled",
+                        onClick = { showNotificationDialog = true }
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
+
+                SettingsSection(title = "Appearance") {
+                    SettingsItem(
+                        icon = Icons.Default.DarkMode,
+                        title = "Dark Mode",
+                        subtitle = when (uiState.darkMode) {
+                            DarkMode.SYSTEM -> "System default"
+                            DarkMode.LIGHT -> "Light"
+                            DarkMode.DARK -> "Dark"
+                        },
+                        onClick = { showDarkModeDialog = true }
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
+
+                SettingsSection(title = "Data") {
+                    SettingsItem(
+                        icon = Icons.Default.CloudSync,
+                        title = "Sync",
+                        subtitle = "Sync your data",
+                        onClick = { viewModel.onEvent(SettingsEvent.SyncNow) }
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
+
+                SettingsSection(title = "About") {
+                    SettingsItem(
+                        icon = Icons.Default.Info,
+                        title = "App Version",
+                        subtitle = "1.0.0",
+                        onClick = { }
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
+
                 SettingsItem(
-                    icon = Icons.Default.Security,
-                    title = "Profile",
-                    subtitle = "Manage your account details",
-                    onClick = { }
+                    icon = Icons.AutoMirrored.Filled.Logout,
+                    title = "Logout",
+                    subtitle = "Sign out of your account",
+                    titleColor = ExpenseRed,
+                    onClick = { showLogoutDialog = true }
                 )
-                SettingsItem(
-                    icon = Icons.Default.Notifications,
-                    title = "Notifications",
-                    subtitle = "Manage notification preferences",
-                    onClick = { }
-                )
+
+                Spacer(modifier = Modifier.height(Spacing.huge))
             }
-            
-            HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
-            
-            // Appearance Section
-            SettingsSection(title = "Appearance") {
-                SettingsItem(
-                    icon = Icons.Default.DarkMode,
-                    title = "Dark Mode",
-                    subtitle = "Coming soon",
-                    onClick = { }
-                )
-            }
-            
-            HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
-            
-            // About Section
-            SettingsSection(title = "About") {
-                SettingsItem(
-                    icon = Icons.Default.Info,
-                    title = "App Version",
-                    subtitle = "1.0.0",
-                    onClick = { }
-                )
-            }
-            
-            HorizontalDivider(modifier = Modifier.padding(vertical = Spacing.medium))
-            
-            // Logout
-            SettingsItem(
-                icon = Icons.AutoMirrored.Filled.Logout,
-                title = "Logout",
-                subtitle = "Sign out of your account",
-                titleColor = ExpenseRed,
-                onClick = { showLogoutDialog = true }
-            )
-            
-            Spacer(modifier = Modifier.height(Spacing.huge))
         }
     }
 }
@@ -203,7 +307,7 @@ private fun SettingsItem(
             modifier = Modifier.size(24.dp),
             tint = titleColor
         )
-        
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,

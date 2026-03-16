@@ -1,6 +1,7 @@
 package com.praveen.expensetracker.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,9 +30,14 @@ import com.praveen.expensetracker.data.model.Expense
 import com.praveen.expensetracker.ui.theme.Typography
 
 @Composable
-fun ExpenseItem(expense: Expense) {
+fun ExpenseItem(
+    expense: Expense,
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),

@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -37,9 +38,9 @@ public class User implements UserDetails {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(name = "monthly_budget")
+    @Column(name = "monthly_budget", precision = 15, scale = 2)
     @Builder.Default
-    private Double monthlyBudget = 50000.0;
+    private BigDecimal monthlyBudget = new BigDecimal("50000.0");
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

@@ -99,15 +99,15 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
             @Param("month") int month,
             @Param("year") int year);
 
-    @Query("SELECT e FROM Expense e LEFT JOIN FETCH e.category WHERE e.user.id = :userId ORDER BY e.expenseDate DESC")
+    @Query("SELECT e FROM Expense e LEFT JOIN FETCH e.category WHERE e.user.id = :userId ORDER BY e.date DESC")
     List<Expense> findByUserIdOrderByExpenseDateDesc(@Param("userId") UUID userId);
 
-    @Query("SELECT e FROM Expense e LEFT JOIN FETCH e.category WHERE e.user.id = :userId ORDER BY e.expenseDate DESC")
+    @Query("SELECT e FROM Expense e LEFT JOIN FETCH e.category WHERE e.user.id = :userId ORDER BY e.date DESC")
     List<Expense> findByUserIdOrderByExpenseDateDesc(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e " +
            "WHERE e.user.id = :userId " +
-           "AND e.expenseDate >= :startDate AND e.expenseDate < :endDate")
+           "AND e.date >= :startDate AND e.date < :endDate")
     BigDecimal sumByUserAndDateRange(
             @Param("userId") UUID userId,
             @Param("startDate") LocalDate startDate,
@@ -115,7 +115,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
 
     @Query("SELECT e.category.name, SUM(e.amount) FROM Expense e " +
            "WHERE e.user.id = :userId " +
-           "AND e.expenseDate >= :startDate AND e.expenseDate < :endDate " +
+           "AND e.date >= :startDate AND e.date < :endDate " +
            "GROUP BY e.category.name")
     List<Object[]> sumByCategoryAndDateRange(
             @Param("userId") UUID userId,
@@ -124,16 +124,16 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
 
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e " +
            "WHERE e.user.id = :userId AND e.category.id = :categoryId " +
-           "AND e.expenseDate >= :startDate AND e.expenseDate < :endDate")
+           "AND e.date >= :startDate AND e.date < :endDate")
     BigDecimal sumByUserCategoryAndDateRange(
             @Param("userId") UUID userId,
             @Param("categoryId") UUID categoryId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    @Query("SELECT e.expenseDate, SUM(e.amount) FROM Expense e " +
-           "WHERE e.user.id = :userId AND e.expenseDate >= :startDate " +
-           "GROUP BY e.expenseDate ORDER BY e.expenseDate")
+    @Query("SELECT e.date, SUM(e.amount) FROM Expense e " +
+           "WHERE e.user.id = :userId AND e.date >= :startDate " +
+           "GROUP BY e.date ORDER BY e.date")
     List<Object[]> sumByDayFrom(
             @Param("userId") UUID userId,
             @Param("startDate") LocalDate startDate);

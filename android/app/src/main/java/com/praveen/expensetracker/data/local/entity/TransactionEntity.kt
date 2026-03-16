@@ -4,8 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.praveen.expensetracker.domain.model.Category
-import com.praveen.expensetracker.domain.model.TransactionType
 import java.time.LocalDateTime
 
 @Entity(
@@ -14,7 +12,8 @@ import java.time.LocalDateTime
         Index(value = ["date_time"]),
         Index(value = ["category"]),
         Index(value = ["type"]),
-        Index(value = ["merchant_name"])
+        Index(value = ["merchant_name"]),
+        Index(value = ["sync_status"])
     ]
 )
 data class TransactionEntity(
@@ -29,10 +28,10 @@ data class TransactionEntity(
     val merchantName: String,
     
     @ColumnInfo(name = "category")
-    val category: Category,
+    val category: String,
     
     @ColumnInfo(name = "type")
-    val type: TransactionType,
+    val type: String,
     
     @ColumnInfo(name = "date_time")
     val dateTime: LocalDateTime,
@@ -55,9 +54,27 @@ data class TransactionEntity(
     @ColumnInfo(name = "sms_hash")
     val smsHash: String? = null,
     
+    // Sync fields
+    @ColumnInfo(name = "sync_status")
+    val syncStatus: SyncStatus = SyncStatus.SYNCED,
+    
+    @ColumnInfo(name = "remote_id")
+    val remoteId: String? = null,
+    
+    @ColumnInfo(name = "last_modified")
+    val lastModified: LocalDateTime = LocalDateTime.now(),
+    
     @ColumnInfo(name = "created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
     
     @ColumnInfo(name = "updated_at")
     val updatedAt: LocalDateTime = LocalDateTime.now()
 )
+
+enum class SyncStatus {
+    SYNCED,
+    PENDING_CREATE,
+    PENDING_UPDATE,
+    PENDING_DELETE,
+    CONFLICT
+}

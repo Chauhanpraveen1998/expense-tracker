@@ -22,6 +22,7 @@ sealed class Screen(val route: String) {
     object Analytics : Screen("analytics")
     object Accounts : Screen("accounts")
     object Settings : Screen("settings")
+    object Profile : Screen("profile")
     
     object TransactionDetail : Screen("transaction/{transactionId}") {
         fun createRoute(transactionId: String): String = "transaction/$transactionId"

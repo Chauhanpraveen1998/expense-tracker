@@ -133,6 +133,8 @@ fun DashboardScreen(
     onNavigateToAddExpense: () -> Unit,
     onNavigateToHistory: () -> Unit,
     onLogout: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToTransactionDetail: (String) -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -262,12 +264,24 @@ fun DashboardScreen(
                 }
 
                 item {
-                    Text(
-                        text = "Recent Transactions",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Recent Transactions",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        TextButton(onClick = onNavigateToHistory) {
+                            Text(
+                                text = "See All",
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
@@ -301,7 +315,10 @@ fun DashboardScreen(
                     }
                 } else {
                     items(uiState.recentExpenses) { expense ->
-                        ExpenseItem(expense = expense)
+                        ExpenseItem(
+                            expense = expense,
+                            onClick = { onNavigateToTransactionDetail(expense.id) }
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }

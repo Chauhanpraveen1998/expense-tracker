@@ -1,9 +1,10 @@
 package com.praveen.expensetracker.data.repository
 
 import com.praveen.expensetracker.data.local.dao.TransactionDao
+import com.praveen.expensetracker.data.local.entity.SyncStatus
 import com.praveen.expensetracker.data.mapper.toDomain
-import com.praveen.expensetracker.data.mapper.toDomainList
 import com.praveen.expensetracker.data.mapper.toEntity
+import com.praveen.expensetracker.data.mapper.toDomainList
 import com.praveen.expensetracker.domain.model.Category
 import com.praveen.expensetracker.domain.model.CategorySpending
 import com.praveen.expensetracker.domain.model.SpendingTrend
@@ -46,11 +47,17 @@ class TransactionRepositoryImpl @Inject constructor(
     }
     
     override suspend fun insertTransaction(transaction: Transaction) {
-        transactionDao.insertTransaction(transaction.toEntity())
+        transactionDao.insertTransaction(transaction.toEntity().copy(
+            syncStatus = SyncStatus.PENDING_CREATE
+        ))
     }
     
     override suspend fun updateTransaction(transaction: Transaction) {
-        transactionDao.updateTransaction(transaction.toEntity())
+        val existing = transactionDao.getTransactionById(transaction.id)
+        transactionDao.updateTransaction(transaction.toEntity().copy(
+            syncStatus = if (existing?.remoteId != null) SyncStatus.PENDING_UPDATE else SyncStatus.PENDING_CREATE,
+            remoteId = existing?.remoteId
+        ))
     }
     
     override suspend fun deleteTransaction(transactionId: String) {
@@ -58,13 +65,13 @@ class TransactionRepositoryImpl @Inject constructor(
     }
     
     override fun getTransactionsByType(type: TransactionType): Flow<List<Transaction>> {
-        return transactionDao.getTransactionsByType(type).map { entities ->
+        return transactionDao.getTransactionsByType(type.name).map { entities ->
             entities.toDomainList()
         }
     }
     
     override fun getTransactionsByCategory(category: Category): Flow<List<Transaction>> {
-        return transactionDao.getTransactionsByCategory(category).map { entities ->
+        return transactionDao.getTransactionsByCategory(category.name).map { entities ->
             entities.toDomainList()
         }
     }
@@ -86,7 +93,7 @@ class TransactionRepositoryImpl @Inject constructor(
     
     override suspend fun getTotalIncome(startDate: LocalDateTime, endDate: LocalDateTime): Double {
         return transactionDao.getTotalByTypeAndDateRange(
-            TransactionType.INCOME,
+            TransactionType.INCOME.name,
             startDate,
             endDate
         ) ?: 0.0
@@ -94,7 +101,7 @@ class TransactionRepositoryImpl @Inject constructor(
     
     override suspend fun getTotalExpense(startDate: LocalDateTime, endDate: LocalDateTime): Double {
         return transactionDao.getTotalByTypeAndDateRange(
-            TransactionType.EXPENSE,
+            TransactionType.EXPENSE.name,
             startDate,
             endDate
         ) ?: 0.0
@@ -109,7 +116,7 @@ class TransactionRepositoryImpl @Inject constructor(
         
         return summary.map { tuple ->
             CategorySpending(
-                category = tuple.category,
+                category = try { Category.valueOf(tuple.category) } catch (e: Exception) { Category.OTHER_EXPENSE },
                 amount = tuple.total,
                 percentage = if (total > 0) (tuple.total / total * 100).toFloat() else 0f,
                 transactionCount = 0

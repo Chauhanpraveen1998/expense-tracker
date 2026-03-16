@@ -2,10 +2,16 @@ package com.praveen.expensetracker.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.LocalDateTime
 
-@Entity(tableName = "accounts")
+@Entity(
+    tableName = "accounts",
+    indices = [
+        Index(value = ["sync_status"])
+    ]
+)
 data class AccountEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
@@ -18,7 +24,7 @@ data class AccountEntity(
     val type: String,
     
     @ColumnInfo(name = "balance")
-    val balance: Double,
+    val balance: Double = 0.0,
     
     @ColumnInfo(name = "bank_name")
     val bankName: String? = null,
@@ -34,6 +40,16 @@ data class AccountEntity(
     
     @ColumnInfo(name = "is_active")
     val isActive: Boolean = true,
+    
+    // Sync fields
+    @ColumnInfo(name = "sync_status")
+    val syncStatus: SyncStatus = SyncStatus.SYNCED,
+    
+    @ColumnInfo(name = "remote_id")
+    val remoteId: String? = null,
+    
+    @ColumnInfo(name = "last_modified")
+    val lastModified: LocalDateTime = LocalDateTime.now(),
     
     @ColumnInfo(name = "created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),

@@ -18,6 +18,7 @@ import com.praveen.expensetracker.ui.screens.auth.LoginScreen
 import com.praveen.expensetracker.ui.screens.auth.RegisterScreen
 import com.praveen.expensetracker.ui.screens.auth.SplashScreen
 import com.praveen.expensetracker.ui.screens.dashboard.DashboardScreen
+import com.praveen.expensetracker.ui.screens.settings.ProfileScreen
 import com.praveen.expensetracker.ui.screens.settings.SettingsScreen
 import com.praveen.expensetracker.ui.screens.transactions.TransactionDetailScreen
 import com.praveen.expensetracker.ui.screens.transactions.TransactionsScreen
@@ -106,6 +107,17 @@ fun AppNavHost(
 
         composable(route = Screen.Dashboard.route) {
             DashboardScreen(
+                onNavigateToAddExpense = {
+                    navController.navigate(Screen.AddTransaction.route)
+                },
+                onNavigateToHistory = {
+                    navController.navigate(Screen.Transactions.route)
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 },
@@ -147,10 +159,21 @@ fun AppNavHost(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onLogout = {
+                onNavigateToProfile = {
+                    navController.navigate(Screen.Profile.route)
+                },
+                onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
                         popUpTo(0) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(route = Screen.Profile.route) {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

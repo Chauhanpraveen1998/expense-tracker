@@ -6,9 +6,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.praveen.expensetracker.data.local.entity.SyncStatus
 import com.praveen.expensetracker.data.local.entity.TransactionEntity
-import com.praveen.expensetracker.domain.model.Category
-import com.praveen.expensetracker.domain.model.TransactionType
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
@@ -43,10 +42,10 @@ interface TransactionDao {
     fun getTransactionByIdFlow(transactionId: String): Flow<TransactionEntity?>
     
     @Query("SELECT * FROM transactions WHERE type = :type ORDER BY date_time DESC")
-    fun getTransactionsByType(type: TransactionType): Flow<List<TransactionEntity>>
+    fun getTransactionsByType(type: String): Flow<List<TransactionEntity>>
     
     @Query("SELECT * FROM transactions WHERE category = :category ORDER BY date_time DESC")
-    fun getTransactionsByCategory(category: Category): Flow<List<TransactionEntity>>
+    fun getTransactionsByCategory(category: String): Flow<List<TransactionEntity>>
     
     @Query("""
         SELECT * FROM transactions 
@@ -67,7 +66,7 @@ interface TransactionDao {
     fun searchTransactions(query: String): Flow<List<TransactionEntity>>
     
     @Query("SELECT SUM(amount) FROM transactions WHERE type = :type")
-    suspend fun getTotalByType(type: TransactionType): Double?
+    suspend fun getTotalByType(type: String): Double?
     
     @Query("""
         SELECT SUM(amount) FROM transactions 
@@ -75,7 +74,7 @@ interface TransactionDao {
         AND date_time >= :startDate AND date_time <= :endDate
     """)
     suspend fun getTotalByTypeAndDateRange(
-        type: TransactionType,
+        type: String,
         startDate: LocalDateTime,
         endDate: LocalDateTime
     ): Double?
@@ -86,7 +85,7 @@ interface TransactionDao {
         AND date_time >= :startDate AND date_time <= :endDate
     """)
     suspend fun getTotalByCategory(
-        category: Category,
+        category: String,
         startDate: LocalDateTime,
         endDate: LocalDateTime
     ): Double?
@@ -129,10 +128,29 @@ interface TransactionDao {
         startDate: LocalDateTime,
         endDate: LocalDateTime
     ): List<DailySpendingTuple>
+    
+    // Sync queries
+    @Query("SELECT * FROM transactions WHERE sync_status != 'SYNCED'")
+    suspend fun getPendingSyncTransactions(): List<TransactionEntity>
+
+    @Query("SELECT * FROM transactions WHERE sync_status = :status")
+    suspend fun getTransactionsBySyncStatus(status: SyncStatus): List<TransactionEntity>
+
+    @Query("UPDATE transactions SET sync_status = :status WHERE id = :id")
+    suspend fun updateSyncStatus(id: String, status: SyncStatus)
+
+    @Query("UPDATE transactions SET sync_status = :status, remote_id = :remoteId WHERE id = :id")
+    suspend fun updateSyncStatusWithRemoteId(id: String, status: SyncStatus, remoteId: String)
+
+    @Query("DELETE FROM transactions WHERE sync_status = 'PENDING_DELETE' AND remote_id IS NULL")
+    suspend fun deletePendingLocalOnly()
+
+    @Query("DELETE FROM transactions WHERE sync_status = 'SYNCED'")
+    suspend fun deleteAllSyncedTransactions()
 }
 
 data class CategorySpendingTuple(
-    val category: Category,
+    val category: String,
     val total: Double
 )
 
