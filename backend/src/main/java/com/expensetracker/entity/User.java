@@ -37,6 +37,10 @@ public class User implements UserDetails {
     @Column(name = "full_name")
     private String fullName;
 
+    @Column(name = "monthly_budget")
+    @Builder.Default
+    private Double monthlyBudget = 50000.0;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;

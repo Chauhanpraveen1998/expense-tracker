@@ -28,8 +28,8 @@ class GetDashboardDataUseCase @Inject constructor(
         val totalExpense = repository.getTotalExpense(startOfMonth, endOfMonth)
         val safeToSpend = (monthlyBudget - totalExpense).coerceAtLeast(0.0)
         val budgetUsedPercentage = if (monthlyBudget > 0) {
-            (totalExpense / monthlyBudget * 100).toFloat()
-        } else 0f
+            (totalExpense / monthlyBudget * 100)
+        } else 0.0
         
         val recentTransactions = repository.getRecentTransactions(10).first()
         

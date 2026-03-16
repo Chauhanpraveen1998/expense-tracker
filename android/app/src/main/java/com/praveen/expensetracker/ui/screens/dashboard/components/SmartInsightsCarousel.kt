@@ -61,7 +61,7 @@ fun SmartInsightsCarousel(
         ) {
             items(
                 items = displayInsights,
-                key = { it.id }
+                key = { "${it.title}_${it.type}" }
             ) { insight ->
                 InsightCard(insight = insight)
             }
@@ -162,19 +162,19 @@ private fun getInsightStyle(type: InsightType): Pair<ImageVector, List<Color>> {
 private fun getDefaultInsights(): List<Insight> {
     return listOf(
         Insight(
-            id = "default_1",
+            id = "start_tracking",
             type = InsightType.INFO,
             title = "Start Tracking",
             description = "Add your transactions to get personalized insights and manage your finances better."
         ),
         Insight(
-            id = "default_2",
+            id = "set_budget",
             type = InsightType.TIP,
             title = "Set a Budget",
             description = "Create a monthly budget to track your spending and save more."
         ),
         Insight(
-            id = "default_3",
+            id = "track_weekly",
             type = InsightType.TREND,
             title = "Track Weekly",
             description = "Regularly log expenses to see spending patterns over time."

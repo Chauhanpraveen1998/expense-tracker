@@ -117,7 +117,7 @@ class AuthViewModel @Inject constructor(
                 onSuccess = {
                     _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
                 },
-                onFailure = { e ->
+                onFailure = { e: Throwable ->
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 
@@ -178,7 +178,7 @@ class AuthViewModel @Inject constructor(
                 onSuccess = {
                     _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
                 },
-                onFailure = { e ->
+                onFailure = { e: Throwable ->
                     _uiState.update { 
                         it.copy(
                             isLoading = false, 

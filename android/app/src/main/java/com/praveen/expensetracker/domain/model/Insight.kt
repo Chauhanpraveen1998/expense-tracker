@@ -2,17 +2,13 @@ package com.praveen.expensetracker.domain.model
 
 data class Insight(
     val id: String,
+    val type: InsightType,
     val title: String,
     val description: String,
-    val type: InsightType,
-    val actionRoute: String? = null,
-    val relatedCategory: Category? = null,
-    val percentageChange: Double? = null
+    val actionText: String? = null,
+    val relatedCategory: Category? = null
 )
 
 enum class InsightType {
-    TIP,
-    WARNING,
-    INFO,
-    TREND
+    TIP, WARNING, INFO, TREND
 }
